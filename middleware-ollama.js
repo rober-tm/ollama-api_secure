@@ -4,11 +4,11 @@ import { cors } from 'hono/cors'
 
 // Cargar variables de entorno desde .env si está disponible
 if (typeof Bun !== 'undefined' && Bun.env) {
-  // Bun ya carga .env automáticamente
+    // Bun ya carga .env automáticamente
 } else {
-  try {
-    await import('dotenv/config')
-  } catch {}
+    try {
+        await import('dotenv/config')
+    } catch { }
 }
 
 const app = new Hono()
@@ -38,7 +38,7 @@ app.use('*', authMiddleware)
 app.all('*', async (c) => {
     const url = new URL(c.req.url)
     const targetUrl = `${OLLAMA_BASE_URL}${url.pathname}${url.search}`
-
+    // console.log({ body: await c.req.text(), targetUrl })
     try {
         const response = await fetch(targetUrl, {
             method: c.req.method,
@@ -58,6 +58,7 @@ app.all('*', async (c) => {
             responseHeaders[key] = value
         })
 
+        // console.log(`Response from Ollama: ${response.status}`, response.json ? JSON.stringify(await response.clone().json()) : await response.clone().text())
         return new Response(response.body, {
             status: response.status,
             headers: responseHeaders
